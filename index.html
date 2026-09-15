@@ -234,8 +234,34 @@
   .project-img.portrait{height:280px;background:rgba(5,10,18,.72);padding:10px;}
   .project-img.portrait img{width:100%;height:100%;object-fit:contain;filter:grayscale(20%) contrast(1.03);}
   .project-card:hover .project-img.portrait img{transform:scale(1.02);filter:grayscale(0%) contrast(1.03);}
+  /* Mobile project cards: keep the same clean proportions as desktop without changing desktop styles. */
   @media(max-width:699px){
-    .project-img,.project-img.portrait{height:320px;}
+    .project-img,.project-img.portrait{
+      height:280px;
+      padding:10px;
+      background:rgba(5,10,18,.72);
+    }
+    .project-img img,
+    .project-img video{
+      width:auto;
+      max-width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+    .project-img:not(.portrait):not(.project-video) img{
+      width:100%;
+      object-fit:cover;
+    }
+    .project-video video{
+      max-height:100%;
+      border-radius:1px;
+    }
+    .project-body{padding:20px 18px;}
+    .project-body h3{font-size:1.12rem;}
+    .project-body p{font-size:.9rem;line-height:1.6;}
+    .tech-tags{gap:7px;margin-top:14px;}
+    .tech-tags span{font-size:.66rem;padding:4px 8px;}
+    .project-link{padding-top:14px;}
   }
   .project-img::after{content:"";position:absolute;left:0;right:0;top:-10%;height:14%;
     background:linear-gradient(180deg, transparent, rgba(78,147,184,.65), transparent);opacity:0;}
@@ -866,6 +892,30 @@
         faceCollageVideo.play().catch(() => {});
       });
     }
+
+    /* FaceCollage demo: autoplay when available and restart after every ending. */
+    document.querySelectorAll('.project-video video').forEach(video => {
+      video.muted = true;
+      video.playsInline = true;
+      const playVideo = () => {
+        const p = video.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      };
+      video.addEventListener('ended', () => {
+        video.currentTime = 0;
+        playVideo();
+      });
+      if ('IntersectionObserver' in window) {
+        const videoObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) playVideo();
+          });
+        }, { threshold: 0.15 });
+        videoObserver.observe(video);
+      } else {
+        playVideo();
+      }
+    });
 
     /* magnetic buttons */
     if (!isTouch && !reducedMotion) {
